@@ -1,5 +1,49 @@
 use crate::{hal, Channel, Error, Pca9685, Register};
 
+
+
+impl<I2C, E> hal::pwm::Pwm<> for Pca9685<I2C>
+where
+    I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
+{
+    type Duty = u16;
+    type Channel = Channel;
+    type Time = ();
+    type Error = Error<E>;
+
+    fn try_disable(&mut self, ch: &Channel) -> Result<(), Self::Error> { 
+        self.set_channel_full_off(ch)
+    }
+
+    fn try_enable(&mut self, ch: &Channel) -> Result<(), Self::Error> { 
+        unimplemented!()
+    }
+
+    fn try_get_duty(&self, _ch: &Channel) -> Result<u16, Self::Error> { 
+        unimplemented!()
+    }
+
+    fn try_get_max_duty(&self) -> Result<u16, Self::Error> { 
+        Ok(0)
+    }
+
+    fn try_set_duty(&mut self, _ch: &Channel, _p: u16) -> Result<(), Self::Error> { 
+        Ok(())
+    }
+
+    fn try_get_period(&self) -> Result<Self::Time, Self::Error> { 
+        unimplemented!()
+    
+    }
+
+    fn try_set_period<T>(&mut self, _: T) -> Result<(), Self::Error> 
+        where T: Into<Self::Time>
+    {
+        unimplemented!()
+    }
+
+}
+
 impl<I2C, E> Pca9685<I2C>
 where
     I2C: hal::blocking::i2c::Write<Error = E> + hal::blocking::i2c::WriteRead<Error = E>,
@@ -92,7 +136,7 @@ where
             data[i * 4 + 4] = (*off >> 8) as u8;
         }
         self.enable_auto_increment()?;
-        self.i2c.write(self.address, &data).map_err(Error::I2C)
+        self.i2c.try_write(self.address, &data).map_err(Error::I2C)
     }
 }
 

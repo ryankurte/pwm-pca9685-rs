@@ -55,7 +55,7 @@ where
 {
     pub(crate) fn write_mode2(&mut self, config: Config) -> Result<(), Error<E>> {
         self.i2c
-            .write(self.address, &[Register::MODE2, config.mode2])
+            .try_write(self.address, &[Register::MODE2, config.mode2])
             .map_err(Error::I2C)?;
         self.config.mode2 = config.mode2;
         Ok(())
@@ -63,7 +63,7 @@ where
 
     pub(crate) fn write_mode1(&mut self, config: Config) -> Result<(), Error<E>> {
         self.i2c
-            .write(self.address, &[Register::MODE1, config.mode1])
+            .try_write(self.address, &[Register::MODE1, config.mode1])
             .map_err(Error::I2C)?;
         self.config.mode1 = config.mode1;
         Ok(())
@@ -86,7 +86,7 @@ where
     ) -> Result<(), Error<E>> {
         self.enable_auto_increment()?;
         self.i2c
-            .write(
+            .try_write(
                 self.address,
                 &[
                     address,
@@ -106,14 +106,14 @@ where
     ) -> Result<(), Error<E>> {
         self.enable_auto_increment()?;
         self.i2c
-            .write(self.address, &[address, value as u8, (value >> 8) as u8])
+            .try_write(self.address, &[address, value as u8, (value >> 8) as u8])
             .map_err(Error::I2C)
     }
 
     pub(crate) fn read_register(&mut self, address: u8) -> Result<u8, Error<E>> {
         let mut data = [0];
         self.i2c
-            .write_read(self.address, &[address], &mut data)
+            .try_write_read(self.address, &[address], &mut data)
             .map_err(Error::I2C)
             .and(Ok(data[0]))
     }
